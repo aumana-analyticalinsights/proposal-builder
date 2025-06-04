@@ -1,0 +1,82 @@
+{
+  "name": "Augusto Umaña",
+  "hourly_rate": 85.0,
+  "skills": [
+    "Python",
+    "R",
+    "SQL",
+    "Data Analytics",
+    "Machine Learning",
+    "Data Science",
+    "Business Intelligence",
+    "Statistical Analysis",
+    "Data Visualization",
+    "Sales Analytics",
+    "Marketing Analytics",
+    "Customer Analytics",
+    "Predictive Modeling",
+    "Time Series Analysis",
+    "A/B Testing",
+    "Hypothesis Testing",
+    "Regression Analysis",
+    "Cluster Analysis",
+    "Classification",
+    "Feature Engineering",
+    "Microsoft Power BI",
+    "RStudio",
+    "pandas",
+    "NumPy",
+    "Scikit-learn",
+    "XGBoost",
+    "MLflow",
+    "Matplotlib",
+    "Microsoft Excel"
+  ],
+  "experience_years": 18,
+  "specializations": [
+    "Sales Analytics",
+    "Marketing Analytics", 
+    "Customer Data Analysis",
+    "Business Intelligence",
+    "Predictive Analytics",
+    "Customer Lifetime Value (LTV)",
+    "Price Elasticity Modeling",
+    "Customer Profiling",
+    "Sales Forecasting"
+  ],
+  "portfolio_examples": [
+    {
+      "title": "Customer Profiling Model for Retail Bank",
+      "description": "Developed advanced customer segmentation and profiling model using machine learning techniques to identify high-value customer segments and optimize targeting strategies",
+      "results": "Achieved 250% increase in sales through improved customer targeting and personalized marketing strategies"
+    },
+    {
+      "title": "Automated Campaign Optimization System",
+      "description": "Built end-to-end campaign management system with real-time personalization capabilities for financial services company, processing customer data and generating personalized offers at scale",
+      "results": "Enabled delivery of 90+ personalized offers per month to 2.5M+ customers, significantly enhancing engagement and conversion rates"
+    },
+    {
+      "title": "Price Elasticity Optimization Model",
+      "description": "Developed sophisticated price elasticity model for CPG company using advanced statistical techniques and machine learning to optimize pricing strategies across product lines",
+      "results": "Drove 8% revenue increase in Q4 2022 through data-driven pricing optimization and strategic recommendations"
+    },
+    {
+      "title": "Customer Lifetime Value (LTV) Infrastructure",
+      "description": "Built comprehensive LTV calculation system for Betterway e-commerce using Amazon reports, implementing data processing pipelines and validation frameworks for customer data from 2020 onward",
+      "results": "Delivered validated LTV metrics supporting strategic decisions on acquisition costs, discounting, and long-term profitability. Client feedback: 'Really loved working with Augusto... professional, clear communication, and curious to learn about new industries'"
+    }
+  ],
+  "achievements": [
+    "Upwork Expert Vetted Badge holder",
+    "100% Job Success Score on Upwork",
+    "Upwork Top Rated Plus freelancer",
+    "Three master's degrees: Economics, Applied Mathematics, and Data Science",
+    "Certified Python developer with 18+ years in analytics",
+    "Helped companies across diverse sectors: CPG, banking, financial services, e-commerce",
+    "Delivered measurable ROI improvements: 250% sales increase, 8% revenue growth, 2.5M+ customers reached",
+    "Expert in both supervised and unsupervised machine learning techniques",
+    "Specialized in customer analytics and sales performance optimization",
+    "Advanced statistical modeling expertise with real-world business impact"
+  ],
+  "languages": ["English", "Spanish"]
+}
