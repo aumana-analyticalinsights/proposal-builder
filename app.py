@@ -37,7 +37,7 @@ class ProposalGeneratorApp:
     
     def __init__(self):
         self.file_manager = FileManager()
-        self.template_manager = TemplateManager()
+        self.template_manager = TemplateManager(self.file_manager)
         self.history_manager = HistoryManager()
         self.config = self._load_system_config()
         

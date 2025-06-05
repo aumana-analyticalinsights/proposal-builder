@@ -106,7 +106,7 @@ class ProposalOutput(BaseModel):
     """Generated proposal output"""
     proposal_text: str
     execution_plan: ExecutionPlan
-    reviewer_feedback: str
+    reviewer_feedback: List[str]
     quality_score: float
     estimated_win_probability: float
     recommendations: List[str]
