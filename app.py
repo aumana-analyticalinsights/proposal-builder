@@ -15,7 +15,7 @@ from models.core_models import (
     FreelancerProfile, JobPost, ProposalRequest, ProposalTemplate,
     APIProvider, SystemConfig, ProposalHistory, ProposalStatus
 )
-from core.orchestrator import ProposalOrchestrator, ExpressOrchestrator
+from core.simple_orchestrator import SimpleProposalOrchestrator, SimpleExpressOrchestrator
 from utils.file_manager import FileManager
 from utils.template_manager import TemplateManager
 from utils.history_manager import HistoryManager
@@ -309,12 +309,12 @@ class ProposalGeneratorApp:
             # Generate proposal
             with st.spinner("Generating proposal..."):
                 if express_mode:
-                    orchestrator = ExpressOrchestrator(self.config)
+                    orchestrator = SimpleExpressOrchestrator(self.config)
                     result = asyncio.run(
                         orchestrator.generate_express_proposal(request, template)
                     )
                 else:
-                    orchestrator = ProposalOrchestrator(self.config)
+                    orchestrator = SimpleProposalOrchestrator(self.config)
                     result = asyncio.run(
                         orchestrator.generate_proposal(request, template)
                     )
@@ -484,26 +484,73 @@ class ProposalGeneratorApp:
 class FileManager:
     """Handles file operations for profiles, templates, etc."""
     
+    def __init__(self, base_dir: str = "."):
+        self.base_dir = Path(base_dir)
+        self.profiles_dir = self.base_dir / "profiles"
+        self.templates_dir = self.base_dir / "templates"
+        self.outputs_dir = self.base_dir / "outputs"
+        self.history_dir = self.base_dir / "history"
+        
+        # Create directories if they don't exist
+        self._ensure_directories()
+    
+    def _ensure_directories(self):
+        """Create necessary directories"""
+        for directory in [self.profiles_dir, self.templates_dir, 
+                         self.outputs_dir, self.history_dir]:
+            directory.mkdir(parents=True, exist_ok=True)
+    
     def list_profiles(self) -> List[str]:
         """List available freelancer profiles"""
-        # Placeholder implementation
-        return ["profile1.json", "profile2.json"]
+        try:
+            profiles = []
+            if self.profiles_dir.exists():
+                for file_path in self.profiles_dir.glob("*.json"):
+                    profiles.append(file_path.name)
+            return sorted(profiles) if profiles else ["example_profile.json"]
+        except Exception as e:
+            logger.error(f"Error listing profiles: {e}")
+            return ["example_profile.json"]
     
-    def load_profile(self, path: str) -> FreelancerProfile:
+    def load_profile(self, filename: str) -> FreelancerProfile:
         """Load a freelancer profile"""
-        # Placeholder implementation
+        try:
+            file_path = self.profiles_dir / filename
+            if file_path.exists():
+                import json
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    profile_data = json.load(f)
+                return FreelancerProfile(**profile_data)
+            else:
+                # Return default profile if file doesn't exist
+                return self._get_default_profile()
+        except Exception as e:
+            logger.error(f"Error loading profile {filename}: {e}")
+            return self._get_default_profile()
+    
+    def _get_default_profile(self) -> FreelancerProfile:
+        """Get default profile for testing"""
         return FreelancerProfile(
-            name="John Doe",
+            name="Default User",
             hourly_rate=50.0,
             skills=["Python", "Machine Learning", "Data Analysis"],
             experience_years=5,
-            specializations=["NLP", "Computer Vision"],
-            portfolio_examples=[],
-            achievements=["Led 10+ ML projects", "Published 5 papers"]
+            specializations=["Data Science", "Analytics"],
+            portfolio_examples=[
+                {
+                    "title": "Sample Project",
+                    "description": "Example data science project",
+                    "results": "Achieved measurable business impact"
+                }
+            ],
+            achievements=["Led successful data science projects", "Expert in Python and ML"]
         )
 
 class TemplateManager:
     """Manages proposal templates"""
+    
+    def __init__(self, file_manager: FileManager):
+        self.file_manager = file_manager
     
     def list_templates(self) -> List[str]:
         """List available templates"""
@@ -511,23 +558,108 @@ class TemplateManager:
     
     def load_template(self, name: str) -> ProposalTemplate:
         """Load a template"""
-        return ProposalTemplate(
-            name=name,
-            sections={},
-            variables=[],
-            tone="professional"
-        )
+        templates = {
+            "professional": ProposalTemplate(
+                name="professional",
+                sections={
+                    "greeting": "Dear {client_name},",
+                    "understanding": "I understand you need {project_summary}",
+                    "approach": "My approach: {execution_plan}",
+                    "experience": "With {experience_years} years of experience...",
+                    "pricing": "Investment: ${total_cost} for {total_hours} hours",
+                    "closing": "Looking forward to working together.\n\nBest regards,\n{freelancer_name}"
+                },
+                variables=["client_name", "project_summary", "execution_plan", "experience_years", "total_cost", "total_hours", "freelancer_name"],
+                tone="professional"
+            ),
+            "technical": ProposalTemplate(
+                name="technical",
+                sections={
+                    "greeting": "Hello {client_name},",
+                    "technical_analysis": "Technical approach: {execution_plan}",
+                    "implementation": "Implementation plan with {total_hours} hours",
+                    "pricing": "Development cost: ${total_cost}",
+                    "closing": "Ready to start development.\n\n{freelancer_name}"
+                },
+                variables=["client_name", "execution_plan", "total_hours", "total_cost", "freelancer_name"],
+                tone="technical"
+            ),
+            "creative": ProposalTemplate(
+                name="creative",
+                sections={
+                    "greeting": "Hi {client_name}! 👋",
+                    "enthusiasm": "Your project looks amazing!",
+                    "approach": "Here's how I'll tackle it: {execution_plan}",
+                    "investment": "Investment: ${total_cost}",
+                    "excitement": "Let's create something awesome! 🚀\n\n{freelancer_name}"
+                },
+                variables=["client_name", "execution_plan", "total_cost", "freelancer_name"],
+                tone="creative"
+            )
+        }
+        return templates.get(name, templates["professional"])
 
 class HistoryManager:
     """Manages proposal history"""
     
+    def __init__(self):
+        # Initialize with empty history for now
+        self.history_file = Path("history") / "proposals.json"
+        self.history_file.parent.mkdir(exist_ok=True)
+    
     def get_recent_proposals(self, limit: int) -> List[ProposalHistory]:
         """Get recent proposals"""
+        try:
+            if self.history_file.exists():
+                import json
+                with open(self.history_file, 'r') as f:
+                    data = json.load(f)
+                    proposals = []
+                    for item in data[-limit:]:
+                        proposals.append(ProposalHistory(
+                            id=item["id"],
+                            job_title=item["job_title"],
+                            client_name=item.get("client_name"),
+                            generated_at=datetime.fromisoformat(item["generated_at"]),
+                            status=ProposalStatus(item["status"]),
+                            budget_proposed=item["budget_proposed"],
+                            final_cost=item.get("final_cost"),
+                            notes=item.get("notes")
+                        ))
+                    return proposals
+        except Exception as e:
+            logger.error(f"Error loading history: {e}")
         return []
     
     def save_proposal(self, history: ProposalHistory, result):
         """Save proposal to history"""
-        pass
+        try:
+            # Load existing history
+            history_data = []
+            if self.history_file.exists():
+                import json
+                with open(self.history_file, 'r') as f:
+                    history_data = json.load(f)
+            
+            # Add new proposal
+            history_data.append({
+                "id": history.id,
+                "job_title": history.job_title,
+                "client_name": history.client_name,
+                "generated_at": history.generated_at.isoformat(),
+                "status": history.status.value,
+                "budget_proposed": history.budget_proposed,
+                "final_cost": history.final_cost,
+                "notes": history.notes
+            })
+            
+            # Save back to file
+            import json
+            with open(self.history_file, 'w') as f:
+                json.dump(history_data, f, indent=2)
+                
+        except Exception as e:
+            logger.error(f"Error saving to history: {e}")
 
 # Main application entry point
 if __name__ == "__main__":
