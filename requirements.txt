@@ -1,6 +1,10 @@
+# Requirements.txt compatible with Python 3.13
 streamlit>=1.28.0
-langchain>=0.0.350
-crewai>=0.1.0
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+langchain-anthropic>=0.2.0
 openai>=1.3.0
 anthropic>=0.8.0
 pydantic>=2.0.0
@@ -8,4 +12,8 @@ pandas>=2.0.0
 python-dotenv>=1.0.0
 pyyaml>=6.0
 sqlalchemy>=2.0.0
-asyncio-extensions>=0.1.0
+
+# Additional dependencies for agent functionality
+typing-extensions>=4.0.0
+asyncio>=3.4.3
+json5>=0.9.0
