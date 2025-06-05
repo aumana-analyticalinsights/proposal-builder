@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from enum import Enum
+from dotenv import load_dotenv 
 
 # LangChain imports for LLM initialization
 from langchain_openai import ChatOpenAI
@@ -20,7 +21,8 @@ from agents.simple_agents import (
     BusinessTranslatorAgent, CostingAgent, 
     CommercialWriterAgent, ReviewerAgent
 )
-
+# Load environment variables
+load_dotenv() 
 logger = logging.getLogger(__name__)
 
 class ProcessState(str, Enum):
