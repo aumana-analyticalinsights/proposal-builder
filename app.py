@@ -554,34 +554,56 @@ class TemplateManager:
     
     def list_templates(self) -> List[str]:
         """List available templates"""
-        return ["professional", "technical", "creative"]
+        templates = ["professional", "technical", "creative"]
+        
+        # Agregar templates desde archivos JSON
+        templates_dir = Path("templates")
+        if templates_dir.exists():
+            for file_path in templates_dir.glob("*.json"):
+                template_name = file_path.stem
+                if template_name not in templates:
+                    templates.append(template_name)
+        
+        return sorted(templates)
     
     def load_template(self, name: str) -> ProposalTemplate:
         """Load a template"""
+        # Intentar cargar desde archivo JSON primero
+        template_file = Path(f"templates/{name}.json")
+        if template_file.exists():
+            try:
+                import json
+                with open(template_file, 'r', encoding='utf-8') as f:
+                    template_data = json.load(f)
+                return ProposalTemplate(**template_data)
+            except Exception as e:
+                logger.error(f"Error loading template {name}: {e}")
+        
+        # Si no existe, usar templates hardcoded
         templates = {
             "professional": ProposalTemplate(
                 name="professional",
                 sections={
                     "greeting": "Dear {client_name},",
                     "understanding": "I understand you need {project_summary}",
-                    "approach": "My approach: {execution_plan}",
+                    "approach": "My approach: {execution_plan_formatted}",
                     "experience": "With {experience_years} years of experience...",
                     "pricing": "Investment: ${total_cost} for {total_hours} hours",
                     "closing": "Looking forward to working together.\n\nBest regards,\n{freelancer_name}"
                 },
-                variables=["client_name", "project_summary", "execution_plan", "experience_years", "total_cost", "total_hours", "freelancer_name"],
+                variables=["client_name", "project_summary", "execution_plan_formatted", "experience_years", "total_cost", "total_hours", "freelancer_name"],
                 tone="professional"
             ),
             "technical": ProposalTemplate(
                 name="technical",
                 sections={
                     "greeting": "Hello {client_name},",
-                    "technical_analysis": "Technical approach: {execution_plan}",
+                    "technical_analysis": "Technical approach: {execution_plan_formatted}",
                     "implementation": "Implementation plan with {total_hours} hours",
                     "pricing": "Development cost: ${total_cost}",
                     "closing": "Ready to start development.\n\n{freelancer_name}"
                 },
-                variables=["client_name", "execution_plan", "total_hours", "total_cost", "freelancer_name"],
+                variables=["client_name", "execution_plan_formatted", "total_hours", "total_cost", "freelancer_name"],
                 tone="technical"
             ),
             "creative": ProposalTemplate(
@@ -589,11 +611,11 @@ class TemplateManager:
                 sections={
                     "greeting": "Hi {client_name}! 👋",
                     "enthusiasm": "Your project looks amazing!",
-                    "approach": "Here's how I'll tackle it: {execution_plan}",
+                    "approach": "Here's how I'll tackle it: {execution_plan_formatted}",
                     "investment": "Investment: ${total_cost}",
                     "excitement": "Let's create something awesome! 🚀\n\n{freelancer_name}"
                 },
-                variables=["client_name", "execution_plan", "total_cost", "freelancer_name"],
+                variables=["client_name", "execution_plan_formatted", "total_cost", "freelancer_name"],
                 tone="creative"
             )
         }
