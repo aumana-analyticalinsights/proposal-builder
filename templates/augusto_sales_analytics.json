@@ -1,0 +1,26 @@
+{
+  "name": "augusto_sales_analytics",
+  "sections": {
+    "greeting": "Hi {client_name},",
+    
+    "hook": "I just reviewed your {job_title} project and immediately recognized the challenge you're facing: {project_hook}. Having worked with similar companies in {industry_context}, I know exactly how critical it is to get this right – the difference between actionable insights and just more data can literally make or break your {business_outcome}.",
+    
+    "why_augusto": "Here's why I'm confident I can deliver exactly what you need:\n\n**Experience:** {experience_years} years specializing in sales and marketing analytics across {industry_experience}\n\n**Proven Results:** {key_achievement} – this type of measurable impact is what I consistently deliver for my clients\n\n**Perfect Alignment:** Your project requires expertise in {required_skills_match}, which directly aligns with my core specializations in {specialization_match}",
+    
+    "approach": "**My Strategic Approach:**\n\n{execution_plan_formatted}\n\n**Key Deliverables:**\n{key_deliverables}\n\nThis methodology has consistently helped my clients {expected_outcome} while ensuring the solution is practical, scalable, and immediately actionable.",
+    
+    "timeline": "**Timeline & Milestones:**\n\n{timeline_breakdown}\n\n**Total Duration:** {estimated_timeline}\n\nI typically start new projects within 24-48 hours and provide regular progress updates to keep you informed every step of the way.",
+    
+    "budget": "**Investment:** Based on the scope and complexity, this project falls within your stated budget range of ${budget_min:,.0f} - ${budget_max:,.0f}. My detailed estimate is ${total_cost:,.0f} for {total_hours:.0f} hours of focused work, which includes all development, testing, documentation, and post-delivery support.",
+    
+    "closing": "I'd love to discuss your specific requirements in more detail and answer any questions you might have. I'm confident we can achieve the {desired_outcome} you're looking for.\n\n**Ready to get started?** I'm available for a quick call this week to dive deeper into your needs and finalize the approach.\n\nBest regards,\n{freelancer_name}\n\n**P.S.** I always welcome feedback on my proposals – if there's anything you'd like me to clarify or adjust, just let me know. My goal is to make this as easy as possible for you."
+  },
+  "variables": [
+    "client_name", "job_title", "project_hook", "industry_context", "business_outcome",
+    "experience_years", "industry_experience", "key_achievement", "required_skills_match", 
+    "specialization_match", "execution_plan_formatted", "key_deliverables", "expected_outcome",
+    "timeline_breakdown", "estimated_timeline", "budget_min", "budget_max", "total_cost", 
+    "total_hours", "desired_outcome", "freelancer_name"
+  ],
+  "tone": "professional"
+}
