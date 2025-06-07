@@ -122,10 +122,11 @@ class TemplateManager:
             return "Error rendering template"
     
     def extract_variables_from_context(self, template: ProposalTemplate, 
-                                     job_post, freelancer_profile, 
-                                     execution_plan) -> Dict[str, Any]:
+                                    job_post, freelancer_profile, 
+                                    execution_plan) -> Dict[str, Any]:
         """Extract template variables from context objects"""
         
+        # Variables básicas
         variables = {
             # Job-related variables
             "client_name": job_post.client_name or "there",
@@ -145,6 +146,8 @@ class TemplateManager:
             "total_hours": execution_plan.total_hours,
             "total_cost": execution_plan.total_cost,
             "execution_plan_formatted": self._format_execution_plan(execution_plan),
+            "budget_min": job_post.budget_min or 0,
+            "budget_max": job_post.budget_max or execution_plan.total_cost,
             
             # Derived variables
             "estimated_timeline": self._estimate_timeline(execution_plan.total_hours),
@@ -154,7 +157,208 @@ class TemplateManager:
             "technical_deliverables": self._extract_technical_deliverables(execution_plan)
         }
         
+        # Variables específicas para la plantilla de Augusto
+        if template.name == "augusto_sales_analytics":
+            variables.update(self._generate_augusto_specific_variables(job_post, freelancer_profile, execution_plan))
+        
         return variables
+
+    def _generate_augusto_specific_variables(self, job_post, freelancer_profile, execution_plan) -> Dict[str, Any]:
+        """Generate specific variables for Augusto's template"""
+        
+        # Analizar el job post para extraer contexto específico
+        job_description = job_post.description.lower()
+        
+        # Detectar industria/contexto
+        industry_context = self._detect_industry_context(job_description)
+        
+        # Generar hook del proyecto
+        project_hook = self._generate_project_hook(job_post, job_description)
+        
+        # Generar outcome esperado
+        business_outcome = self._detect_business_outcome(job_description)
+        
+        # Experiencia en industrias (basado en portfolio)
+        industry_experience = self._extract_industry_experience(freelancer_profile)
+        
+        # Key achievement (más específico)
+        key_achievement = self._select_best_achievement(freelancer_profile, job_description)
+        
+        # Match de skills requeridas
+        required_skills_match = self._match_required_skills(job_post, freelancer_profile)
+        
+        # Match de especializaciones
+        specialization_match = self._match_specializations(freelancer_profile, job_description)
+        
+        # Deliverables clave
+        key_deliverables = self._generate_key_deliverables(execution_plan)
+        
+        # Timeline breakdown
+        timeline_breakdown = self._generate_timeline_breakdown(execution_plan)
+        
+        # Expected outcome
+        expected_outcome = self._generate_expected_outcome(job_description)
+        
+        # Desired outcome
+        desired_outcome = self._extract_desired_outcome(job_post)
+        
+        return {
+            "project_hook": project_hook,
+            "industry_context": industry_context,
+            "business_outcome": business_outcome,
+            "industry_experience": industry_experience,
+            "key_achievement": key_achievement,
+            "required_skills_match": required_skills_match,
+            "specialization_match": specialization_match,
+            "key_deliverables": key_deliverables,
+            "timeline_breakdown": timeline_breakdown,
+            "expected_outcome": expected_outcome,
+            "desired_outcome": desired_outcome
+        }
+
+    def _detect_industry_context(self, job_description: str) -> str:
+        """Detect industry context from job description"""
+        industry_keywords = {
+            "retail": ["retail", "store", "shopping", "customer", "sales"],
+            "banking": ["bank", "financial", "credit", "loan", "investment"],
+            "e-commerce": ["ecommerce", "e-commerce", "online", "marketplace", "shopify"],
+            "saas": ["saas", "software", "subscription", "platform", "app"],
+            "healthcare": ["health", "medical", "patient", "clinical", "hospital"],
+            "manufacturing": ["manufacturing", "production", "supply chain", "inventory"],
+            "cpg": ["consumer", "product", "brand", "fmcg", "cpg"]
+        }
+        
+        for industry, keywords in industry_keywords.items():
+            if any(keyword in job_description for keyword in keywords):
+                return industry
+        
+        return "various industries"
+
+    def _generate_project_hook(self, job_post, job_description: str) -> str:
+        """Generate a compelling project hook"""
+        if "revenue" in job_description or "sales" in job_description:
+            return "turning your sales data into a revenue-driving machine"
+        elif "customer" in job_description and "churn" in job_description:
+            return "predicting and preventing customer churn before it impacts your bottom line"
+        elif "forecast" in job_description or "predict" in job_description:
+            return "building accurate forecasting models that actually guide business decisions"
+        elif "dashboard" in job_description or "report" in job_description:
+            return "creating actionable dashboards that drive real business decisions"
+        elif "analytics" in job_description:
+            return "transforming raw data into strategic insights that move the needle"
+        else:
+            return "leveraging data analytics to solve your core business challenges"
+
+    def _detect_business_outcome(self, job_description: str) -> str:
+        """Detect the main business outcome"""
+        if "revenue" in job_description:
+            return "revenue growth"
+        elif "retention" in job_description:
+            return "customer retention strategy"
+        elif "efficiency" in job_description:
+            return "operational efficiency"
+        elif "conversion" in job_description:
+            return "conversion optimization"
+        else:
+            return "business performance"
+
+    def _extract_industry_experience(self, freelancer_profile) -> str:
+        """Extract industry experience from portfolio"""
+        industries = []
+        for example in freelancer_profile.portfolio_examples[:3]:
+            description = example.get("description", "").lower()
+            if "bank" in description:
+                industries.append("banking")
+            elif "retail" in description:
+                industries.append("retail")
+            elif "cpg" in description or "consumer" in description:
+                industries.append("CPG")
+            elif "ecommerce" in description or "e-commerce" in description:
+                industries.append("e-commerce")
+        
+        return ", ".join(set(industries)) if industries else "multiple sectors including banking, retail, and CPG"
+
+    def _select_best_achievement(self, freelancer_profile, job_description: str) -> str:
+        """Select the most relevant achievement"""
+        achievements = freelancer_profile.achievements
+        
+        # Buscar achievements que mencionen números/resultados
+        for achievement in achievements:
+            if any(keyword in achievement.lower() for keyword in ["250%", "increase", "improved", "optimization"]):
+                if any(keyword in job_description for keyword in ["sales", "revenue", "customer"]):
+                    return achievement
+        
+        # Fallback al primer achievement
+        return achievements[0] if achievements else "Delivered measurable business impact across multiple projects"
+
+    def _match_required_skills(self, job_post, freelancer_profile) -> str:
+        """Match required skills with freelancer skills"""
+        required_skills = [skill.lower() for skill in job_post.skills_required]
+        freelancer_skills = [skill.lower() for skill in freelancer_profile.skills]
+        
+        matches = [skill for skill in required_skills if any(fs in skill or skill in fs for fs in freelancer_skills)]
+        
+        if matches:
+            return ", ".join(matches[:3])
+        else:
+            return ", ".join(freelancer_profile.skills[:3])
+
+    def _match_specializations(self, freelancer_profile, job_description: str) -> str:
+        """Match specializations with job requirements"""
+        specializations = freelancer_profile.specializations
+        
+        relevant_specs = []
+        for spec in specializations:
+            if any(keyword in job_description for keyword in spec.lower().split()):
+                relevant_specs.append(spec)
+        
+        if relevant_specs:
+            return " and ".join(relevant_specs[:2])
+        else:
+            return " and ".join(specializations[:2])
+
+    def _generate_key_deliverables(self, execution_plan) -> str:
+        """Generate key deliverables list"""
+        deliverables = []
+        for task in execution_plan.tasks[:4]:  # Top 4 tasks
+            deliverables.append(f"• {task.task}")
+        
+        return "\n".join(deliverables)
+
+    def _generate_timeline_breakdown(self, execution_plan) -> str:
+        """Generate timeline breakdown by phases"""
+        total_hours = execution_plan.total_hours
+        
+        if total_hours <= 40:
+            return "Week 1: Analysis & Planning\nWeek 2: Development & Testing\nWeek 3: Delivery & Documentation"
+        elif total_hours <= 80:
+            return "Weeks 1-2: Data Analysis & Model Development\nWeeks 3-4: Implementation & Testing\nWeek 5: Delivery & Training"
+        else:
+            return "Month 1: Analysis & Foundation\nMonth 2: Development & Testing\nMonth 3: Implementation & Optimization"
+
+    def _generate_expected_outcome(self, job_description: str) -> str:
+        """Generate expected outcome based on job description"""
+        if "increase" in job_description and "sales" in job_description:
+            return "significantly increase sales performance and revenue"
+        elif "reduce" in job_description and "churn" in job_description:
+            return "reduce customer churn and improve retention"
+        elif "optimize" in job_description:
+            return "optimize operations and improve efficiency"
+        else:
+            return "achieve measurable business improvements"
+
+    def _extract_desired_outcome(self, job_post) -> str:
+        """Extract the main desired outcome"""
+        description = job_post.description.lower()
+        
+        if "revenue" in description or "sales" in description:
+            return "revenue growth you're targeting"
+        elif "efficiency" in description:
+            return "operational efficiency gains"
+        elif "insight" in description:
+            return "actionable insights"
+        else:
+            return "business objectives"
     
     def _format_execution_plan(self, plan) -> str:
         """Format execution plan for template"""
